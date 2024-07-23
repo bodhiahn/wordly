@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { TextField, Box } from '@mui/material';
 
-export default function WordlyInput({ row, inputs, onInputChange, colors, disabled, onSubmit, givenLetterIndex, currentGuessIndex }) {
+export default function WordlyInput({ row, inputs, onInputChange, colors, disabled, onSubmit, currentGuessIndex }) {
   const inputRefs = useRef([]);
 
   const handleKeyDown = (index) => (event) => {
@@ -16,58 +16,42 @@ export default function WordlyInput({ row, inputs, onInputChange, colors, disabl
         event.preventDefault(); // Prevent the default action of the key
         onInputChange(row, index, key.toUpperCase());
         if (index < inputRefs.current.length - 1) {
-          if (row === 0 && index + 1 === givenLetterIndex) {
-            inputRefs.current[index + 2]?.focus();
-          } else {
-            inputRefs.current[index + 1]?.focus();
-          }
+          inputRefs.current[index + 1]?.focus();
+        } else {
+          inputRefs.current[index]?.focus(); // Stay on the last input
         }
       }
     } else if (isBackspace) {
-        event.preventDefault(); // Prevent the default backspace behavior
+      event.preventDefault(); // Prevent the default backspace behavior
 
-        if (inputs[index] === '') {
+      if (inputs[index] === '') {
         if (index > 0) {
-            const prevIndex = (row === 0 && index - 1 === givenLetterIndex) ? index - 2 : index - 1;
-            onInputChange(row, prevIndex, ''); // Clear the previous input
-            if (prevIndex >= 0) {
-            inputRefs.current[prevIndex]?.focus();
-            } else {
-            inputRefs.current[index]?.focus();
-            }
+          onInputChange(row, index - 1, ''); // Clear the previous input
+          inputRefs.current[index - 1]?.focus();
         } else {
-            onInputChange(row, index, ''); // Clear current input if at index 0
+          onInputChange(row, index, ''); // Clear current input if at index 0
         }
-        } else {
+      } else {
         onInputChange(row, index, ''); // Clear current input
         if (index > 0) {
-            const prevIndex = (row === 0 && index - 1 === givenLetterIndex) ? index - 2 : index - 1;
-            if (prevIndex >= 0) {
-            inputRefs.current[prevIndex]?.focus();
-            } else {
-            inputRefs.current[index]?.focus();
-            }
-        } else if (index === 0 && givenLetterIndex === 0 && row === 0) {
-            inputRefs.current[1]?.focus();
+          inputRefs.current[index - 1]?.focus();
         }
-        }
-        } else if (isEnter) {
-        onSubmit();
-        }
+      }
+    } else if (isEnter) {
+      onSubmit();
+    }
   };
 
   useEffect(() => {
     if (currentGuessIndex === row) {
-      const firstEmpty = inputs.findIndex((input, index) => input === "" && (row !== 0 || index !== givenLetterIndex));
+      const firstEmpty = inputs.findIndex((input) => input === "");
       if (firstEmpty !== -1) {
         inputRefs.current[firstEmpty]?.focus();
-      } else if (row === 0 && givenLetterIndex !== null && inputs[givenLetterIndex] === "") {
-        inputRefs.current[givenLetterIndex]?.focus();
       } else {
         inputRefs.current[inputs.length - 1]?.focus();
       }
     }
-  }, [currentGuessIndex, row, inputs, givenLetterIndex]);
+  }, [currentGuessIndex, row, inputs]);
 
   return (
     <Box display="flex" justifyContent="center">

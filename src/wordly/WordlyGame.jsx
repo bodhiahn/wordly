@@ -4,6 +4,7 @@ import { Box, Button, Grid, Typography, Container, Paper, Dialog, DialogContent,
 import WordlyInput from './WordlyInput';
 import words from './words.json'; // Assuming you have a words.json file
 import AdminPanel from './AdminPanel';
+import RulesDialog from './RulesDialog';
 
 const getNewWord = () => {
   const filteredWords = words.filter(word => word.length >= 4 && word.length <= 6);
@@ -19,19 +20,14 @@ export default function WordlyGame() {
   const [gameOver, setGameOver] = useState(false);
   const [givenLetterIndex, setGivenLetterIndex] = useState(null);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(true);
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * correctWord.length);
     setGivenLetterIndex(randomIndex);
-    setGuesses(prevGuesses => {
-      const newGuesses = Array(7).fill().map(() => Array(6).fill(""));
-      newGuesses[0][randomIndex] = correctWord[randomIndex];
-      return newGuesses;
-    });
   }, [correctWord]);
 
   const handleInputChange = (row, col, value) => {
-    if (col === givenLetterIndex && row === 0) return; // Prevent changing the given letter
     const newGuesses = guesses.map((guess, rowIndex) =>
       rowIndex === row ? guess.map((letter, colIndex) => (colIndex === col ? value.toUpperCase() : letter)) : guess
     );
@@ -44,20 +40,33 @@ export default function WordlyGame() {
       if (words.includes(currentGuess.toLowerCase())) {
         const newColors = [...colors];
         let isWin = true;
+        const letterCounts = {};
+
+        // Count the letters in the correct word
+        for (let letter of correctWord) {
+          letterCounts[letter] = (letterCounts[letter] || 0) + 1;
+        }
+
         for (let i = 0; i < 6; i++) {
           if (currentGuess[i] === correctWord[i]) {
             newColors[currentGuessIndex][i] = '#4caf50'; // Green
-          } else if (correctWord.includes(currentGuess[i])) {
+            letterCounts[currentGuess[i]]--;
+          } else if (correctWord.includes(currentGuess[i]) && letterCounts[currentGuess[i]] > 0) {
             newColors[currentGuessIndex][i] = '#ffeb3b'; // Yellow
+            letterCounts[currentGuess[i]]--;
             isWin = false;
           } else {
             newColors[currentGuessIndex][i] = '#9e9e9e'; // Gray
             isWin = false;
           }
         }
+
         setColors(newColors);
         if (isWin) {
           setError(`You Win! The word was: ${correctWord}. You solved it in ${currentGuessIndex + 1} tries.`);
+          setGameOver(true);
+        } else if (currentGuessIndex >= 6) {
+          setError(`You failed in 7 tries. The word was: ${correctWord}.`);
           setGameOver(true);
         } else {
           setCurrentGuessIndex(currentGuessIndex + 1);
@@ -80,11 +89,6 @@ export default function WordlyGame() {
     setCorrectWord(newWord);
     const randomIndex = Math.floor(Math.random() * newWord.length);
     setGivenLetterIndex(randomIndex);
-    setGuesses(prevGuesses => {
-      const newGuesses = Array(7).fill().map(() => Array(6).fill(""));
-      newGuesses[0][randomIndex] = newWord[randomIndex];
-      return newGuesses;
-    });
     setGameOver(false);
   };
 
@@ -96,11 +100,25 @@ export default function WordlyGame() {
     setAdminOpen(false);
   };
 
+  const handleSetWord = (newWord) => {
+    setCorrectWord(newWord);
+    setGuesses(Array(7).fill().map(() => Array(6).fill("")));
+    setCurrentGuessIndex(0);
+    setColors(Array(7).fill().map(() => Array(6).fill("")));
+    setError('');
+    const randomIndex = Math.floor(Math.random() * newWord.length);
+    setGivenLetterIndex(randomIndex);
+    setGameOver(false);
+  };
+
   return (
     <Container maxWidth="sm">
       <Paper elevation={3} style={{ padding: '2rem', textAlign: 'center' }}>
         <Typography variant="h4" gutterBottom>
           Wordly
+        </Typography>
+        <Typography variant="h6" gutterBottom>
+          Clue: The letter '{correctWord[givenLetterIndex]}' is in the word!
         </Typography>
         <Grid container spacing={1}>
           {guesses.map((guess, rowIndex) => (
@@ -112,7 +130,6 @@ export default function WordlyGame() {
                 colors={colors[rowIndex]}
                 disabled={rowIndex !== currentGuessIndex || gameOver}
                 onSubmit={handleSubmit}
-                givenLetterIndex={givenLetterIndex}
                 currentGuessIndex={currentGuessIndex}
               />
             </Grid>
@@ -136,9 +153,8 @@ export default function WordlyGame() {
         </Box>
       </Paper>
       <Dialog open={adminOpen} onClose={handleAdminClose}>
-        <DialogTitle>Admin Panel</DialogTitle>
         <DialogContent>
-          <AdminPanel setCorrectWord={setCorrectWord} />
+          <AdminPanel setCorrectWord={handleSetWord} />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleAdminClose} color="primary">
@@ -146,6 +162,7 @@ export default function WordlyGame() {
           </Button>
         </DialogActions>
       </Dialog>
+      <RulesDialog open={rulesOpen} onClose={() => setRulesOpen(false)} />
     </Container>
   );
 }
