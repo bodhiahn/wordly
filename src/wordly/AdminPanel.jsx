@@ -42,42 +42,74 @@ const AdminPanel = ({ setCorrectWord }) => {
     }
     setDeleteWord('');
   };
-
-  return (
-    <Box>
-      <Typography variant="h6">Admin Panel</Typography>
-      <TextField
-        label="New Word"
-        value={newWord}
-        onChange={(e) => setNewWord(e.target.value)}
-        fullWidth
-        margin="normal"
-      />
-      <Box display="flex" justifyContent="space-between" mb={2}>
-        <Button variant="contained" onClick={handleAddWord}>
-          Add Word
-        </Button>
-        <Button variant="contained" onClick={handleSetWord}>
-          Set Word
-        </Button>
-      </Box>
-      <TextField
-        label="Delete Word"
-        value={deleteWord}
-        onChange={(e) => setDeleteWord(e.target.value)}
-        fullWidth
-        margin="normal"
-      />
-      <Button variant="contained" onClick={handleDeleteWord} fullWidth>
-        Delete Word
-      </Button>
-      {message && (
-        <Typography color="primary" variant="body1" gutterBottom>
-          {message}
+    return (
+      <Box sx={{ padding: '1.5rem', minWidth: '300px' }}>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            marginBottom: '1.5rem',
+            fontFamily: "'Roboto Slab', serif",
+            fontWeight: 700 
+          }}
+        >
+          Admin Panel
         </Typography>
-      )}
-    </Box>
-  );
-};
+        <TextField
+          label="New Word"
+          value={newWord}
+          onChange={(e) => setNewWord(e.target.value)}
+          fullWidth
+          margin="normal"
+          sx={{ marginBottom: '1rem' }}
+        />
+        <Box 
+          display="flex" 
+          justifyContent="space-between" 
+          gap={2} 
+          mb={3}
+        >
+          <Button 
+            variant="contained" 
+            onClick={handleAddWord}
+            sx={{ flex: 1 }}
+          >
+            Add Word
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={handleSetWord}
+            sx={{ flex: 1 }}
+          >
+            Set Word
+          </Button>
+        </Box>
+        <TextField
+          label="Delete Word"
+          value={deleteWord}
+          onChange={(e) => setDeleteWord(e.target.value)}
+          fullWidth
+          margin="normal"
+          sx={{ marginBottom: '1rem' }}
+        />
+        <Button 
+          variant="contained" 
+          onClick={handleDeleteWord} 
+          fullWidth
+          sx={{ marginBottom: '1rem' }}
+        >
+          Delete Word
+        </Button>
+        {message && (
+          <Typography 
+            color="primary" 
+            variant="body1" 
+            sx={{ marginTop: '1rem' }}
+          >
+            {message}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
 
 export default AdminPanel;

@@ -23,7 +23,7 @@ const RulesDialog = ({ open, onClose }) => {
           4. Green indicates the letter is in the correct position.
         </Typography>
         <Typography variant="body2" gutterBottom>
-          5. Yellow indicates the letter is in the word but in the wrong position.
+          5. Orange indicates the letter is in the word but in the wrong position.
         </Typography>
         <Typography variant="body2" gutterBottom>
           6. Gray indicates the letter is not in the word.
